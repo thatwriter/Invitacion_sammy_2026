@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación Mágica - ¡Fiesta Sorpresa!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           CONFIGURACIÓN VISUAL (CSS)
+           ========================================= */
+        :root {
+            --gold: #d4af37;
+            --dark-magic: #0b0c10;
+            --parchment: #f5e6c6;
+            --ink: #2c1e16;
+            --gryffindor-red: #740001;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--dark-magic);
+            color: #e0e0e0;
+            font-family: 'Lora', serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Fondo de estrellas/partículas mágicas */
+        #magic-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 90%;
+            max-width: 600px;
+            margin: 2rem auto;
+            perspective: 1000px;
+        }
+
+        /* La Carta / Pergamino */
+        .letter {
+            background: linear-gradient(145deg, #f5e6c6 0%, #e8d5a5 50%, #d4c08c 100%);
+            color: var(--ink);
+            padding: 3rem 2rem;
+            border-radius: 8px;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.5),
+                inset 0 0 50px rgba(139, 90, 43, 0.2);
+            border: 2px solid var(--gold);
+            position: relative;
+            text-align: center;
+            animation: floatIn 1.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes floatIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sello de cera */
+        .wax-seal {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #a30000 0%, #5e0000 100%);
+            border-radius: 50%;
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 1px solid #3a0000;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: var(--gryffindor-red);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            font-family: 'Cinzel', serif;
+            color: var(--ink);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.5rem;
+            border-bottom: 1px solid var(--gold);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .secret-warning {
+            background: rgba(116, 0, 1, 0.1);
+            border-left: 4px solid var(--gryffindor-red);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .detail-box {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px dashed var(--gold);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .detail-box p {
+            margin: 0.5rem 0;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: var(--gryffindor-red);
+            font-size: 1.1rem;
+        }
+
+        /* Botón Mágico */
+        .magic-btn {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(to bottom, #d4af37, #aa8a29);
+            color: var(--ink);
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #8a6d1c, 0 6px 10px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .magic-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #8a6d1c, 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .magic-btn:hover {
+            background: linear-gradient(to bottom, #e5c14b, #bb9b30);
+        }
+
+        /* Resultado del Horario */
+        #time-reveal {
+            margin-top: 1.5rem;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        #time-reveal.visible {
+            opacity: 1;
+        }
+
+        .assigned-time {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: var(--gryffindor-red);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin: 0.5rem 0;
+            animation: pulseGold 2s infinite;
+        }
+
+        @keyframes pulseGold {
+            0% { text-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+            50% { text-shadow: 0 0 20px rgba(212, 175, 55, 0.9), 0 0 30px rgba(212, 175, 55, 0.5); }
+            100% { text-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+        }
+
+        .rsvp-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--gold);
+        }
+
+        .rsvp-btn {
+            display: inline-block;
+            background-color: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .rsvp-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .letter { padding: 2rem 1.5rem; }
+            h1 { font-size: 1.6rem; }
+            .assigned-time { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="magic-canvas"></canvas>
+
+    <div class="container">
+        <div class="letter">
+            <div class="wax-seal">H</div>
+            
+            <h1>¡Hechizo de Celebración!</h1>
+            <p><em>Ministerio de Magia - Departamento de Fiestas Sorpresa</em></p>
+
+            <div class="secret-warning">
+                <strong>⚠️ ADVERTENCIA MUGGLE:</strong><br>
+                Este mensaje está protegido por el <em>Encantamiento Confundus</em>. 
+                Estamos organizando una <strong>FIESTA SORPRESA</strong> para <strong id="nombre-cumple">[Nombre de la Cumpleañera]</strong>. 
+                Ella no sabe nada. Si revelas este secreto, serás enviado a Azkaban.
+            </div>
+
+            <h2>📍 El Gran Comedor (Lugar)</h2>
+            <div class="detail-box">
+                <p><strong>Dirección:</strong> <span id="direccion">[Calle, Número, Colonia, Ciudad]</span></p>
+                <p><strong>Fecha:</strong> <span id="fecha">[Día de la semana, Día de Mes]</span></p>
+                <img src="fachada.png" alt="foto de fachada" width=95%>
+                <p><iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d940.4802762644067!2d-99.27481011936372!3d19.458968068498997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTnCsDI3JzMxLjkiTiA5OcKwMTYnMjguNiJX!5e0!3m2!1ses-419!2smx!4v1795058929409!5m2!1ses-419!2smx" width=95% height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></p>
+                <a href="https://maps.app.goo.gl/qaP4UFy5kokEAfUE7"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn-mapa">
+                    <i class="fa-solid fa-map-location-dot rotar-lento icono-giratorio"></i>
+                    Abrir en Google Maps
+                </a>
+            </div>
+
+            <h2>⏳ Protocolo de Llegada </h2>
+            <p>Para evitar que la cumpleañera nos descubra al llegar, la Orden del Fénix ha establecido un protocolo de infiltración.</p>
+            <p>La cumpleañera llegará a las <span class="highlight" id="hora-ella">[20:00 hrs]</span>. <br>Tu llegada debe ser al menos <strong>una hora antes</strong> para estar escondidos.</p>
+            <br>En caso de que no sea posible, llegar <strong>después</strong> de las <span class="highlight">13:00 hrs</span></p>
+            <div class="rsvp-section">
+                <h2>🦉 Envía tu Lechuza para Confirmar</h2>
+                <p>¿Podrás acompañarnos en esta misión? Confirma tu asistencia enviando un hechizo (mensaje) al organizador.</p>
+                <a href="https://wa.me/5611401097?text=¡Mi%20lechuza%20ha%20llegado!%20Confirmo%20mi%20asistencia%20a%20la%20fiesta%20sorpresa." class="rsvp-btn" target="_blank">Enviar Lechuza por WhatsApp</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           CONFIGURACIÓN DE DATOS (EDITAR AQUÍ)
+           ========================================= */
+        const config = {
+            nombreCumpleanera: "Sammai Ontiveros", // Cambia por el nombre real
+            direccion: "Colina Benito Juárez MZ 12 LT 5, Loma Colorada 2da Sección, Naucalpan (Puerta de rejas)", // Cambia por la dirección real
+            fecha: "Sábado 28 de Noviembre", // Cambia por la fecha real
+            horaLlegadaElla: "12:00 hrs", // Hora a la que llega la cumpleañera
+            
+        };
+
+        // Inyectar datos en el HTML
+        document.getElementById('nombre-cumple').innerText = config.nombreCumpleanera;
+        document.getElementById('direccion').innerText = config.direccion;
+        document.getElementById('fecha').innerText = config.fecha;
+        document.getElementById('hora-ella').innerText = config.horaLlegadaElla;
+
+
+                /* =========================================
+           EFECTO VISUAL: PARTÍCULAS MÁGICAS (CANVAS)
+           ========================================= */
+        const canvas = document.getElementById('magic-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const particles = [];
+        const particleCount = 80;
+
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height;
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 10;
+                this.size = Math.random() * 2 + 1;
+                this.speedY = Math.random() * 1 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.color = Math.random() > 0.5 ? '#d4af37' : '#ffffff';
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                if (this.y < -10) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+    </script>
+</body>
+</html>
